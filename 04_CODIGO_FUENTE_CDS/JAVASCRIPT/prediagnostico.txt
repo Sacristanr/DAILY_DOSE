@@ -1,0 +1,114 @@
+<script>
+(function () {
+
+function buscarCampoPorEtiqueta(textoEtiqueta) {
+    const labels = document.querySelectorAll(".ff-el-input--label label");
+
+    for (const label of labels) {
+        const texto = label.textContent.trim();
+        if (texto === textoEtiqueta) {
+            const inputId = label.getAttribute("for");
+            if (inputId) {
+                return document.getElementById(inputId);
+            }
+        }
+    }
+    return null;
+}
+
+function setCampoPorEtiqueta(textoEtiqueta, valor) {
+    const campo = buscarCampoPorEtiqueta(textoEtiqueta);
+    if (campo) {
+        campo.value = valor;
+        campo.setAttribute("value", valor);
+        campo.dispatchEvent(new Event("input", { bubbles: true }));
+        campo.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+}
+
+function setCampoOcultoPorNombre(nombre, valor) {
+    const campo = document.querySelector('[name="' + nombre + '"]');
+    if (campo) {
+        campo.value = valor;
+        campo.setAttribute("value", valor);
+        campo.dispatchEvent(new Event("input", { bubbles: true }));
+        campo.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+}
+
+function calcularDiagnostico() {
+    let total = 0;
+    let respuestas = 0;
+
+    document.querySelectorAll('.ff-el-form-check-input[type="radio"]:checked').forEach(function (el) {
+        const valor = parseInt(el.getAttribute("data-calc_value"), 10);
+        if (!isNaN(valor)) {
+            total += valor;
+            respuestas++;
+        }
+    });
+
+    const resultado = document.getElementById("resultado_diagnostico");
+
+    if (respuestas === 0) {
+        if (resultado) {
+            resultado.innerHTML = "Completa el cuestionario para obtener tu nivel de digitalización.";
+        }
+        setCampoPorEtiqueta("Puntuación total", "");
+        setCampoPorEtiqueta("Nivel detectado", "");
+        return;
+    }
+
+    let nivel = "";
+    let interpretacion = "";
+    let recomendacion = "";
+
+    if (total <= 20) {
+        nivel = "Nivel 1 – Digitalización inicial";
+        interpretacion = "La empresa presenta un nivel muy bajo de digitalización. Existen oportunidades claras de mejora en procesos, herramientas y organización tecnológica.";
+        recomendacion = "CDS recomienda comenzar por una base tecnológica mínima: presencia web profesional, digitalización de tareas administrativas, copias de seguridad y medidas básicas de seguridad informática.";
+    } else if (total <= 40) {
+        nivel = "Nivel 2 – Digitalización básica";
+        interpretacion = "La empresa ha iniciado su proceso de digitalización, pero todavía necesita consolidar herramientas y procesos clave para ganar eficiencia.";
+        recomendacion = "CDS recomienda reforzar la gestión digital mediante herramientas para clientes, facturación, colaboración interna y almacenamiento en la nube.";
+    } else if (total <= 60) {
+        nivel = "Nivel 3 – Digitalización estructurada";
+        interpretacion = "La empresa ya utiliza varias herramientas digitales de forma habitual, aunque todavía puede mejorar en integración, seguridad y aprovechamiento de datos.";
+        recomendacion = "CDS recomienda optimizar procesos, mejorar la integración entre herramientas y reforzar la ciberseguridad.";
+    } else {
+        nivel = "Nivel 4 – Digitalización avanzada";
+        interpretacion = "La empresa presenta un alto nivel de madurez digital. La tecnología forma parte activa de su operativa y de su estrategia de crecimiento.";
+        recomendacion = "CDS recomienda avanzar hacia automatización avanzada, análisis de datos y políticas de ciberseguridad proactiva.";
+    }
+
+    if (resultado) {
+        resultado.innerHTML =
+            "<h3>Resultado del prediagnóstico digital</h3>" +
+            "<p><strong>Puntuación obtenida:</strong> " + total + " / 80</p>" +
+            "<p><strong>Nivel detectado:</strong> " + nivel + "</p>" +
+            "<p><strong>Interpretación:</strong> " + interpretacion + "</p>" +
+            "<p><strong>Recomendación inicial de CDS:</strong> " + recomendacion + "</p>";
+    }
+
+    setCampoPorEtiqueta("Puntuación total", total);
+    setCampoPorEtiqueta("Nivel detectado", nivel);
+    setCampoPorEtiqueta("Interpretación", interpretacion);
+    setCampoPorEtiqueta("Recomendación inicial", recomendacion);
+}
+
+document.addEventListener("change", function (e) {
+    if (e.target.matches('.ff-el-form-check-input[type="radio"]')) {
+        calcularDiagnostico();
+    }
+});
+
+document.addEventListener("submit", function (e) {
+    if (e.target.closest("form")) {
+        calcularDiagnostico();
+    }
+}, true);
+
+setTimeout(calcularDiagnostico, 500);
+
+})();
+</script>

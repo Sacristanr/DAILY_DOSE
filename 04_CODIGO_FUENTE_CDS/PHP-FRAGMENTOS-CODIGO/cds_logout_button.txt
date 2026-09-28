@@ -1,0 +1,11 @@
+add_shortcode('cds_logout_button', 'cds_logout_button_shortcode');
+
+function cds_logout_button_shortcode() {
+    if (!is_user_logged_in()) {
+        return '';
+    }
+
+    $logout_url = wp_logout_url(home_url('/area-privada-cliente/'));
+
+    return '<a class="cds-logout-btn" href="' . esc_url($logout_url) . '">Cerrar sesión</a>';
+}

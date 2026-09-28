@@ -1,0 +1,19 @@
+add_action('template_redirect', 'cds_redirigir_usuarios_internos_desde_area_clientes');
+
+function cds_redirigir_usuarios_internos_desde_area_clientes() {
+    if (!is_user_logged_in()) {
+        return;
+    }
+
+    if (!is_page('area-privada-cliente')) {
+        return;
+    }
+
+    $user = wp_get_current_user();
+    $roles = (array) $user->roles;
+
+    if (in_array('soporte_cds', $roles) || in_array('administrator', $roles) || in_array('admin_cds', $roles)) {
+        wp_redirect(home_url('/panel-soporte/'));
+        exit;
+    }
+}

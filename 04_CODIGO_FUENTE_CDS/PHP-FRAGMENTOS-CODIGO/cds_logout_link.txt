@@ -1,0 +1,4 @@
+add_shortcode('cds_logout_link', function() {
+    $url = wp_logout_url('https://cds-advance.es/area-privada-cliente/');
+    return '<a class="cds-logout-btn" href="' . esc_url($url) . '">Cerrar sesión</a>';
+});

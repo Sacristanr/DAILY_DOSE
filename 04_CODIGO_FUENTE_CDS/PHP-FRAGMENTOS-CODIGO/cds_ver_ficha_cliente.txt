@@ -1,0 +1,114 @@
+add_shortcode('cds_ver_ficha_cliente', 'cds_ver_ficha_cliente_shortcode');
+
+function cds_ver_ficha_cliente_shortcode() {
+    if (!is_user_logged_in()) {
+        return '<p>Debes iniciar sesión para acceder a esta ficha.</p>';
+    }
+
+    $user = wp_get_current_user();
+    $roles = (array) $user->roles;
+
+    if (!in_array('soporte_cds', $roles) && !in_array('administrator', $roles) && !in_array('admin_cds', $roles)) {
+        return '<p>No tienes permisos para acceder a esta ficha.</p>';
+    }
+
+    if (!isset($_GET['cliente_id']) || empty($_GET['cliente_id'])) {
+        return '<p>No se ha especificado ningún cliente.</p>';
+    }
+
+    $cliente_id = intval($_GET['cliente_id']);
+    $post = get_post($cliente_id);
+
+    if (!$post || $post->post_type !== 'clientes') {
+        return '<p>La ficha solicitada no existe.</p>';
+    }
+
+    $codigo = get_field('codigo_cliente', $cliente_id);
+    $cif = get_field('cif', $cliente_id);
+    $contacto = get_field('contacto', $cliente_id);
+    $email = get_field('email_cliente', $cliente_id);
+    $telefono = get_field('telefono_cliente', $cliente_id);
+    $estado = get_field('estado_cliente', $cliente_id);
+    $servicios = get_field('servicios_contratados', $cliente_id);
+    $nivel = get_field('nivel_digitalizacion', $cliente_id);
+    $tecnico = get_field('tecnico_responsable', $cliente_id);
+    $observaciones = get_field('observaciones_internas', $cliente_id);
+
+    /* Campos de archivos */
+    $doc_validado = get_field('documentacion_validada', $cliente_id);
+    $propuesta = get_field('propuestas_presupuestos', $cliente_id);
+    $factura = get_field('facturacion', $cliente_id);
+    $seguimiento = get_field('informes_seguimiento', $cliente_id);
+
+    ob_start();
+
+    echo '<div class="cds-ficha-cliente">';
+
+	echo '<h2>' . esc_html(get_the_title($cliente_id)) . '</h2>';
+
+	if (!empty($codigo)) {
+    	echo '<p class="cds-codigo-cliente"><strong>Código de cliente:</strong> ' . esc_html($codigo) . '</p>';
+	}
+
+	echo '<p><strong>Estado del cliente:</strong> ' . esc_html($estado) . '</p>';
+	echo '<p><strong>CIF / NIF:</strong> ' . esc_html($cif) . '</p>';
+	echo '<p><strong>Persona de contacto:</strong> ' . esc_html($contacto) . '</p>';
+	echo '<p><strong>Correo electrónico:</strong> ' . esc_html($email) . '</p>';
+	echo '<p><strong>Teléfono:</strong> ' . esc_html($telefono) . '</p>';
+
+	echo '<p><strong>Servicios contratados:</strong> ';
+	if (is_array($servicios) && !empty($servicios)) {
+    	echo esc_html(implode(', ', $servicios));
+	} else {
+    	echo 'Sin datos';
+	}
+	echo '</p>';
+
+	echo '<p><strong>Nivel de digitalización:</strong> ' . esc_html($nivel) . '</p>';
+	echo '<p><strong>Técnico responsable:</strong> ' . esc_html($tecnico) . '</p>';
+
+	if (!empty($observaciones)) {
+	    echo '<div class="cds-observaciones">';
+	    echo '<strong>Observaciones internas:</strong>';
+	    echo '<div class="cds-observaciones-texto">';
+	    echo wpautop(wp_kses_post($observaciones));
+	    echo '</div>';
+	    echo '</div>';
+	}
+
+    /* Función auxiliar para pintar archivos ACF */
+    $mostrar_archivo = function($archivo, $titulo_seccion) {
+        if (empty($archivo)) {
+            return;
+        }
+
+        echo '<div class="cds-bloque-documental">';
+        echo '<h3>' . esc_html($titulo_seccion) . '</h3>';
+
+        if (is_array($archivo) && !empty($archivo['url'])) {
+            $nombre = !empty($archivo['title']) ? $archivo['title'] : basename($archivo['url']);
+            echo '<p><a href="' . esc_url($archivo['url']) . '" target="_blank" rel="noopener noreferrer">' . esc_html($nombre) . '</a></p>';
+        } elseif (is_string($archivo)) {
+            $nombre = basename($archivo);
+            echo '<p><a href="' . esc_url($archivo) . '" target="_blank" rel="noopener noreferrer">' . esc_html($nombre) . '</a></p>';
+        }
+
+        echo '</div>';
+    };
+
+    $mostrar_archivo($doc_validado, 'Documentación validada');
+    $mostrar_archivo($propuesta, 'Propuestas y presupuestos');
+    $mostrar_archivo($factura, 'Facturación');
+    $mostrar_archivo($seguimiento, 'Informes y seguimiento');
+
+	echo '</div>';
+
+	$logout_url = wp_logout_url(home_url('/area-privada-cliente/'));
+
+	echo '<div class="cds-ficha-acciones">';
+	echo '<a class="cds-logout-btn" href="' . esc_url($logout_url) . '">Cerrar sesión</a>';
+	echo '<p><a class="cds-volver-panel" href="' . esc_url(home_url('/panel-soporte/')) . '">← Volver al panel soporte</a></p>';
+	echo '</div>';
+
+    	return ob_get_clean();
+	}

@@ -1,0 +1,44 @@
+add_filter('login_redirect', 'cds_redireccion_login_area_cliente', 10, 3);
+
+function cds_redireccion_login_area_cliente($redirect_to, $request, $user) {
+
+    if (isset($user->roles) && is_array($user->roles)) {
+
+        if (in_array('cliente', $user->roles)) {
+            return home_url('/area-privada-cliente/');
+        }
+
+        if (
+            in_array('soporte_cds', $user->roles) ||
+            in_array('admin_cds', $user->roles) ||
+            in_array('administrator', $user->roles)
+        ) {
+            return home_url('/panel-soporte/');
+        }
+    }
+
+    return home_url('/area-privada-cliente/');
+}
+
+add_action('login_form_login', 'cds_login_vacio_volver_area_cliente');
+
+function cds_login_vacio_volver_area_cliente() {
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+        $username = isset($_POST['log']) ? trim($_POST['log']) : '';
+        $password = isset($_POST['pwd']) ? trim($_POST['pwd']) : '';
+
+        if ($username === '' || $password === '') {
+            wp_redirect(home_url('/area-privada-cliente/?login=empty'));
+            exit;
+        }
+    }
+}
+
+add_action('wp_login_failed', 'cds_login_fallido_volver_area_cliente');
+
+function cds_login_fallido_volver_area_cliente() {
+    wp_redirect(home_url('/area-privada-cliente/?login=failed'));
+    exit;
+}

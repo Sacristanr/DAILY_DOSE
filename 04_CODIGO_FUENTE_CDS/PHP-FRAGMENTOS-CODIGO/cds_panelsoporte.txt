@@ -1,0 +1,91 @@
+add_shortcode('cds_panel_soporte', 'cds_panel_soporte_shortcode');
+
+function cds_panel_soporte_shortcode() {
+
+    if (!is_user_logged_in()) {
+        return '<p>Debes iniciar sesión para acceder al panel.</p>';
+    }
+
+    $user = wp_get_current_user();
+    $roles = (array) $user->roles;
+
+    if (!in_array('soporte_cds', $roles) && !in_array('administrator', $roles) && !in_array('admin_cds', $roles)) {
+        return '<p>No tienes permisos para acceder a esta sección.</p>';
+    }
+
+    $args = array(
+        'post_type' => 'clientes',
+        'posts_per_page' => -1,
+        'post_status' => 'publish',
+        'meta_key' => 'codigo_cliente',
+        'orderby' => 'meta_value',
+        'order' => 'ASC'
+    );
+
+    $query = new WP_Query($args);
+    $logout_url = wp_logout_url(home_url('/area-privada-cliente/'));
+
+    ob_start();
+
+    echo '<div class="cds-panel-soporte">';
+    echo '<h2>Listado de clientes</h2>';
+
+    if (!$query->have_posts()) {
+        echo '<p>No hay clientes registrados todavía.</p>';
+    } else {
+        echo '<table class="cds-tabla-clientes">';
+        echo '<thead>';
+        echo '<tr>';
+        echo '<th>Código</th>';
+        echo '<th>Empresa</th>';
+        echo '<th>Contacto</th>';
+        echo '<th>Estado</th>';
+        echo '<th>Técnico</th>';
+        echo '<th>Acciones</th>';
+        echo '</tr>';
+        echo '</thead>';
+        echo '<tbody>';
+
+        while ($query->have_posts()) {
+            $query->the_post();
+
+            $cliente_id = get_the_ID();
+            $codigo = get_field('codigo_cliente', $cliente_id);
+            $contacto = get_field('contacto', $cliente_id);
+            $estado = get_field('estado_cliente', $cliente_id);
+            $tecnico = get_field('tecnico_responsable', $cliente_id);
+
+            $ver_ficha    = home_url('/ficha-cliente/?cliente_id=' . $cliente_id);
+            $editar_ficha = get_edit_post_link($cliente_id);
+
+            echo '<tr>';
+            echo '<td>' . esc_html($codigo ? $codigo : 'Sin código') . '</td>';
+            echo '<td>' . esc_html(get_the_title()) . '</td>';
+            echo '<td>' . esc_html($contacto ? $contacto : 'Sin datos') . '</td>';
+            echo '<td>' . esc_html($estado ? $estado : 'Sin datos') . '</td>';
+            echo '<td>' . esc_html($tecnico ? $tecnico : 'Sin asignar') . '</td>';
+            echo '<td>';
+
+            if ($ver_ficha) {
+                echo '<a href="' . esc_url($ver_ficha) . '">Ver ficha</a>';
+            }
+
+            if ($editar_ficha) {
+                echo ' | <a href="' . esc_url($editar_ficha) . '">Editar ficha</a>';
+            }
+
+            echo '</td>';
+            echo '</tr>';
+        }
+
+        echo '</tbody>';
+        echo '</table>';
+    }
+
+    echo '<p class="cds-panel-soporte-logout"><a class="cds-logout-btn" href="' . esc_url($logout_url) . '">Cerrar sesión</a></p>';
+    echo '</div>';
+
+    wp_reset_postdata();
+
+    return ob_get_clean();
+}

@@ -1,0 +1,10 @@
+Código fuente propio desarrollado para la plataforma CDS.
+
+PHP:
+Shortcodes, control de acceso, redirecciones por rol, panel de soporte, área privada de clientes y generación automática de códigos.
+
+CSS:
+Estilos personalizados de paneles, fichas, tablas y botones.
+
+JavaScript:
+Automatización del cálculo del prediagnóstico digital mediante puntuación, nivel detectado y actualización de campos del formulario.

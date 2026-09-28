@@ -1,0 +1,32 @@
+PROYECTO CDS - ASIR - TFC
+
+Integrantes:
+- Liliana Díaz Lizama
+- Lucía Campos Flores
+- Rubén Sacristán Martín
+
+Estructura del repositorio:
+
+01_MEMORIA
+Documento principal del Trabajo Fin de Ciclo.
+
+02_ANEXOS
+Anexos del proyecto en documentos independientes.
+
+03_BASES_DE_DATOS
+Modelo de datos, exportaciones SQL y copias de seguridad de la base de datos.
+
+04_CODIGO_FUENTE
+Snippets, scripts y código desarrollado para la plataforma.
+
+05_DIAGRAMAS
+Diagramas técnicos y funcionales de CDS y Daily Dose.
+
+06_RECURSOS_GRAFICOS
+Logotipos, fondos, iconos e imágenes utilizadas.
+
+07_EVIDENCIAS
+Capturas y pruebas del funcionamiento de la plataforma.
+
+08_VIDEO_DEMO
+Vídeos demostrativos del proyecto.
